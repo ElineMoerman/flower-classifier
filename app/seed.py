@@ -1,7 +1,10 @@
+from app.database import get_db_session
 from app.schemas.schemas import FlowerTable
-from app.database import db
+from sqlalchemy.orm import Session
 
 def seed_flowers():
+    db_gen = get_db_session()
+    db: Session = next(db_gen)
     try:
         if not db.query(FlowerTable).first():
             flowers = [
@@ -16,4 +19,4 @@ def seed_flowers():
         else:
             print("Flowers table already seeded.")
     finally:
-        db.close()
+        db_gen.close()

@@ -23,6 +23,25 @@ services:
       bash -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
       - .:/app
+    working_dir: /app
 
+  frontend:
+    container_name: flower-frontend
+    build:
+      context: ./frontend
+    ports:
+      - "3055:3001"
+    # Comment out volumes to avoid host bind mount
+    # volumes:
+    #   - ./frontend:/app
+    working_dir: /app
+    command: npm start -- --host 0.0.0.0 --watch-poll
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - BROWSER=none
+      - PORT=3001
+    stdin_open: true
+    tty: true
 volumes:
   mariadb-data:
+  node_modules:
