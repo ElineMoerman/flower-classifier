@@ -1,0 +1,112 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+
+type: pipeline
+name: flower-classification-10
+display_name: Flowers Classification
+experiment_name: classification
+
+inputs:
+  train_test_split_factor: 20
+  epochs: 5
+
+outputs:
+  model: 
+    mode: upload
+  registration_details:
+    mode: upload
+
+settings:
+  # default_compute: serverless
+  default_compute: azureml:flower-machine
+
+jobs:
+  dataprep_daisies:
+    type: command
+    component: components/dataprep/dataprep.yaml
+    inputs:
+      data: 
+        type: uri_folder
+        path: azureml:daisy:1
+    outputs:
+      output_data:
+        mode: rw_mount
+
+  dataprep_dandelions:
+    type: command
+    component: components/dataprep/dataprep.yaml
+    inputs:
+      data: 
+        type: uri_folder
+        path: azureml:dandelion:1
+    outputs:
+      output_data:
+        mode: rw_mount
+
+  dataprep_roses:
+    type: command
+    component: components/dataprep/dataprep.yaml
+    inputs:
+      data: 
+        type: uri_folder
+        path: azureml:rose:1
+    outputs:
+      output_data:
+        mode: rw_mount
+
+  dataprep_sunflowers:
+    type: command
+    component: components/dataprep/dataprep.yaml
+    inputs:
+      data: 
+        type: uri_folder
+        path: azureml:sunflower:1
+    outputs:
+      output_data:
+        mode: rw_mount
+
+  dataprep_tulips:
+    type: command
+    component: components/dataprep/dataprep.yaml
+    inputs:
+      data: 
+        type: uri_folder
+        path: azureml:tulip:1
+    outputs:
+      output_data:
+        mode: rw_mount
+
+  data_split:
+    type: command
+    component: components/dataprep/data_split.yaml
+    inputs:
+      flower_1: ${{parent.jobs.dataprep_daisies.outputs.output_data}}
+      flower_2: ${{parent.jobs.dataprep_dandelions.outputs.output_data}}
+      flower_3: ${{parent.jobs.dataprep_roses.outputs.output_data}}
+      flower_4: ${{parent.jobs.dataprep_sunflowers.outputs.output_data}}
+      flower_5: ${{parent.jobs.dataprep_tulips.outputs.output_data}}
+      train_test_split_factor: ${{parent.inputs.train_test_split_factor}}
+    outputs:
+      testing_data:
+        mode: rw_mount
+      training_data:
+        mode: rw_mount
+
+  training:
+    type: command
+    component: components/training/training.yaml
+    inputs:
+      training_folder: ${{parent.jobs.data_split.outputs.training_data}}
+      testing_folder: ${{parent.jobs.data_split.outputs.testing_data}}
+      epochs: ${{parent.inputs.epochs}}
+    outputs:
+      output_data: ${{parent.outputs.model}}
+
+  register:
+    type: command
+    component: azureml://registries/azureml/components/register_model/versions/0.0.9
+    inputs:
+      model_name: flower-classification
+      model_type: custom_model
+      model_path: ${{parent.jobs.training.outputs.output_data}}
+    outputs:
+      registration_details_folder: ${{ parent.outputs.registration_details }}
