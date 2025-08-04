@@ -26,3 +26,16 @@ export const deleteFlower = async (id) => {
   const response = await axios.delete(`${BASE_URL}/flowers/${id}`);
   return response.data;
 };
+
+export const detectFlower = async (imageFile) => {
+  const formData = new FormData();
+  formData.append('img', imageFile);
+
+  const response = await axios.post(`${BASE_URL}/flowers/upload/image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+};

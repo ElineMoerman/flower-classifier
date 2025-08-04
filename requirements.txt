@@ -3,3 +3,7 @@ uvicorn[standard]==0.22.0
 sqlalchemy==2.0.19
 pymysql==1.0.3
 python-dotenv==1.0.0
+numpy
+tensorflow==2.19.0
+pillow
+python-multipart
