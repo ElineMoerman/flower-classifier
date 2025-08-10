@@ -19,7 +19,8 @@ model = tf.keras.models.load_model(model_path, compile=False)
 
 model.save("unpacked_keras", zipped=False)
 
-@router.post('/upload/image')
+@router.post('/upload/image',
+             summary="Get the predicted flower from the AI model by uploading an image.")
 async def uploadImage(img: UploadFile = File(...)):
     original_image = Image.open(img.file)
     resized_image = original_image.resize((64, 64))

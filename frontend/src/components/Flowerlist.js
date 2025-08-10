@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { fetchFlowers, detectFlower } from '../api';
+import { fetchFlowers, detectFlower, deleteFlower } from '../api';
 import { Link, useLocation } from 'react-router-dom';
-import { FaPencilAlt } from 'react-icons/fa';
+import { FaPencilAlt, FaTrash } from 'react-icons/fa';
 import '../App.css';
 
 function FlowerList() {
@@ -27,6 +27,17 @@ function FlowerList() {
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
   };
+
+const handleDelete = async (id) => {
+  if (window.confirm('Are you sure you want to delete this flower?')) {
+    try {
+      await deleteFlower(id);
+      setFlowers((prevFlowers) => prevFlowers.filter(flower => flower.id !== id));
+    } catch (err) {
+      console.error('Error deleting flower:', err);
+    }
+  }
+};
 
 const handleUpload = async () => {
   if (!selectedFile) {
@@ -93,8 +104,12 @@ const handleUpload = async () => {
               <td>{flower.description}</td>
               <td>
                 <Link to={`/edit/${flower.id}`} aria-label={`Edit ${flower.name}`}>
-                  <FaPencilAlt style={{ cursor: 'pointer', color: '#FFB6C1' }} />
+                  <FaPencilAlt style={{ cursor: 'pointer', color: '#FFB6C1', marginRight: '2px'}} />
                 </Link>
+                <FaTrash
+                  style={{ cursor: 'pointer', color: '#FFB6C1' }}
+                  onClick={() => handleDelete(flower.id)}
+                />
               </td>
             </tr>
           ))}
